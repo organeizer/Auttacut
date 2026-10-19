@@ -538,6 +538,11 @@ impl ExportSettings {
         let fps = rate.num as f64 / rate.den as f64;
         let target = match self.adaptive_bitrate {
             Some(bpp) if bpp > 0.0 => ((w as f64 * h as f64 * fps * bpp as f64) / 1000.0).round() as u32,
+            // A fixed bitrate is set for the sequence's frame size; a scaled-down Match Source
+            // output (`scale` < 1, e.g. a half-size preview) gets the same bits per pixel.
+            _ if self.frame_size.is_none() && self.scale.is_finite() && self.scale > 0.0 && self.scale < 1.0 => {
+                (f64::from(self.bitrate_kbps) * f64::from(self.scale) * f64::from(self.scale)).round() as u32
+            }
             _ => self.bitrate_kbps,
         }
         .max(100);
