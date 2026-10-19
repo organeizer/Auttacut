@@ -862,6 +862,16 @@ fn settings_serde_and_estimates() {
     let a = ExportSettings { adaptive_bitrate: Some(0.2), ..Default::default() };
     assert_eq!(a.resolve(1920, 1080, FrameRate::FPS_30, 48_000).target_kbps, 12_442);
     assert_eq!(a.resolve(3840, 2160, FrameRate::FPS_30, 48_000).target_kbps, 49_766);
+    // a fixed bitrate keeps its bits per pixel when the output is scaled down
+    let half = ExportSettings { scale: 0.5, ..Default::default() };
+    let r = half.resolve(1080, 1920, FrameRate::FPS_30, 48_000);
+    assert_eq!((r.width, r.height, r.target_kbps, r.max_kbps), (540, 960, 5_000, 7_500));
+    // ... but an explicit frame size or full scale keeps the bitrate as set
+    assert_eq!(
+        ExportSettings { scale: 0.5, frame_size: Some((540, 960)), ..Default::default() }.resolve(1080, 1920, FrameRate::FPS_30, 48_000).target_kbps,
+        20_000
+    );
+    assert_eq!(ExportSettings::default().resolve(1080, 1920, FrameRate::FPS_30, 48_000).target_kbps, 20_000);
 }
 
 #[test]
