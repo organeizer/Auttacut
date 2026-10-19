@@ -19,5 +19,8 @@ harfrust = { version = "0.12", default-features = false, features = ["std"] }
 unicode-bidi = "0.3.18"
 # UAX #14 line breaking (Apache-2.0).
 unicode-linebreak = "0.1.5"
+# Dictionary line breaking for scripts written without spaces (Thai, Lao, Khmer, Myanmar)
+# (Unicode-3.0); used only for paragraphs that contain them.
+icu_segmenter = "2.3"
 # UAX #29 extended grapheme clusters (MIT OR Apache-2.0).
 unicode-segmentation = "1.13"

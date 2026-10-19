@@ -376,6 +376,22 @@ struct ParaLine {
     underlines: Vec<(f32, f32, u16)>,
 }
 
+/// Line-break opportunities (byte offsets after the break, ending with `text.len()`).
+/// UAX #14 alone never breaks inside Thai, Lao, Khmer or Myanmar words (class SA), so a
+/// paragraph that contains them takes ICU's dictionary breaker instead.
+fn break_opportunities(text: &str) -> Vec<usize> {
+    let needs_dictionary = text.chars().any(|c| matches!(c, '\u{0E00}'..='\u{0EFF}' | '\u{1000}'..='\u{109F}' | '\u{1780}'..='\u{17FF}'));
+    if needs_dictionary {
+        let seg = icu_segmenter::LineSegmenter::new_auto(icu_segmenter::options::LineBreakOptions::default());
+        let mut out: Vec<usize> = seg.segment_str(text).filter(|&p| p > 0 && p <= text.len()).collect();
+        if out.last() != Some(&text.len()) {
+            out.push(text.len());
+        }
+        return out;
+    }
+    unicode_linebreak::linebreaks(text).map(|(p, _)| p).collect()
+}
+
 /// Lay out one paragraph (no newlines) whose text starts at byte `base` of the whole string.
 fn paragraph(text: &str, base: usize, sty: &Styles, para: &ParagraphStyle) -> Vec<ParaLine> {
     let style = sty.list[0];
@@ -466,7 +482,7 @@ fn paragraph(text: &str, base: usize, sty: &Styles, para: &ParagraphStyle) -> Ve
         Some(maxw) => {
             let mut start = 0usize;
             let mut last_ok: Option<usize> = None;
-            for (p, _) in unicode_linebreak::linebreaks(text) {
+            for p in break_opportunities(text) {
                 loop {
                     let r = start..p;
                     let (ce, _) = trailing_ws(&r);
@@ -870,6 +886,33 @@ mod tests {
         assert!((r.lines[0].x + r.lines[0].width).abs() < 0.01);
         assert_eq!(l.glyphs.len(), 5);
         assert!(l.bounds[1] < -30.0 && l.bounds[3] > 5.0, "{:?}", l.bounds);
+    }
+
+    #[test]
+    fn thai_breaks_between_words_without_spaces() {
+        let text = "ตำรวจบุกจับแก๊งหลอกลวงออนไลน์";
+        let b = break_opportunities(text);
+        assert!(b.len() >= 4, "dictionary breaks inside the run: {b:?}");
+        assert_eq!(b.last(), Some(&text.len()));
+        assert!(b.iter().all(|&p| text.is_char_boundary(p)));
+        assert!(b.windows(2).all(|w| w[0] < w[1]));
+        // never inside a word: "ตำรวจ" (police) stays whole
+        assert!(!b.iter().any(|&p| p > 0 && p < "ตำรวจ".len()));
+        // text without those scripts keeps the UAX #14 breaks
+        assert_eq!(break_opportunities("a b"), vec![2, 3]);
+    }
+
+    #[test]
+    fn thai_paragraph_wraps_in_a_box() {
+        let text = "ตำรวจบุกจับแก๊งหลอกลวงออนไลน์ข้ามชาติที่ภูเก็ต";
+        let one = layout(text, &st(40.0), &ParagraphStyle::default());
+        let w = one.lines[0].width;
+        if w <= 0.0 {
+            return; // no font with Thai glyphs in this build
+        }
+        let l = layout(text, &st(40.0), &ParagraphStyle { width: Some(w / 2.5), ..Default::default() });
+        assert!(l.lines.len() >= 3, "{}", l.lines.len());
+        assert!(l.lines.iter().all(|line| line.width <= w / 2.5 + 0.01));
     }
 
     #[test]
