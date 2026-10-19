@@ -14,7 +14,6 @@
 # menu) = Voreinstellungen. "Timeline" is not translated.
 
 	AAF…	AAF…
-	About FilmCraft	Über FilmCraft
 	Add Audio Submix Track	Audio-Submix-Spur hinzufügen
 	Add Caption at Playhead	Untertitel an Abspielposition hinzufügen
 	Add Chapter Marker…	Kapitelmarker hinzufügen…
@@ -40,7 +39,6 @@
 	Apply Default Transitions to Selection	Standardübergänge auf Auswahl anwenden
 	Apply Video Transition	Videoübergang anwenden
 	Arrange	Anordnen
-	ArtCraft Website	ArtCraft-Website
 	Assembly	Montage
 	Attach Proxies…	Proxys anhängen…
 	Audio	Audio
@@ -145,8 +143,6 @@
 	File…	Datei…
 	Fill frame	Bild füllen
 	FilmCraft Help…	FilmCraft-Hilfe…
-	FilmCraft on GitHub	FilmCraft auf GitHub
-	FilmCraft on getartcraft.com	FilmCraft auf getartcraft.com
 	Final Cut Pro XML…	Final Cut Pro XML…
 	Find Next	Weitersuchen
 	Find…	Suchen…
@@ -195,7 +191,6 @@
 	Install Motion Graphics Template…	Motion-Graphics-Vorlage installieren…
 	Interpret Footage…	Material interpretieren…
 	Iris	Iris
-	Join the ArtCraft Discord…	Dem ArtCraft-Discord beitreten…
 	Keyboard Shortcuts…	Tastenkürzel…
 	Label	Farbmarkierung
 	Labels…	Farbmarkierungen…
@@ -391,3 +386,7 @@
 	Zoom to Sequence	Auf Sequenz zoomen
 	Project Notes	Projektnotizen
 
+# Auttacut
+	About Auttacut	Über Auttacut
+	Auttacut on GitHub	Auttacut auf GitHub
+	Based on FilmCraft by the ArtCraft team	Basiert auf FilmCraft vom ArtCraft-Team
